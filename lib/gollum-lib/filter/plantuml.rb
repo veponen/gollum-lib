@@ -115,7 +115,7 @@ class Gollum::Filter::PlantUML < Gollum::Filter
   # Transcoder class in the PlantUML java code.
   def gen_url(text)
     result = ""
-    compressedData = Zlib::Deflate.deflate(text)
+    compressedData = gzdeflate(text)
     compressedData.chars.each_slice(3) do |bytes|
       #print bytes[0], ' ' , bytes[1] , ' ' , bytes[2]
       b1 = bytes[0].nil? ? 0 : (bytes[0].ord & 0xFF)
@@ -125,7 +125,14 @@ class Gollum::Filter::PlantUML < Gollum::Filter
     end
     "#{server_url}/#{result}"
   end
+  
+  #copied from https://www.agileweboperations.com/how-inflate-and-deflate-data-ruby-and-php. 
+  #fix candidate for propable interface change at PlantUML side. 
+  def gzdeflate (s)
+        Zlib::Deflate.new(nil, -Zlib::MAX_WBITS).deflate(s, Zlib::FINISH)
+  end
 
+  
   def encode6bit(b)
     if b < 10
       return ('0'.ord + b).chr
